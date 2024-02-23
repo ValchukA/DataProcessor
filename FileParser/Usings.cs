@@ -1,0 +1,12 @@
+﻿global using System.ComponentModel.DataAnnotations;
+global using System.Xml;
+global using System.Xml.Serialization;
+global using FileParser;
+global using FileParser.StatusFileDeserializer;
+global using FileParser.StatusFileDeserializer.Xml;
+global using FileParser.StatusFileRepository;
+global using FileParser.StatusFileRepository.Local;
+global using MassTransit;
+global using MessagingContracts;
+global using Microsoft.Extensions.Options;
+global using Riok.Mapperly.Abstractions;
