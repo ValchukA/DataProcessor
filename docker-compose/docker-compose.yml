@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  fileparser:
+    build:
+      context: ..
+      dockerfile: FileParser/Dockerfile
+
+  dataprocessor:
+    build:
+      context: ..
+      dockerfile: DataProcessor/Dockerfile
