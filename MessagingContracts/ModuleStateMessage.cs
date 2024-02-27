@@ -1,6 +1,6 @@
 ﻿namespace MessagingContracts;
 
-public enum ModuleState
+public enum ModuleStateMessage
 {
     Online,
     Run,

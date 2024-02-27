@@ -1,6 +1,6 @@
 ﻿namespace MessagingContracts;
 
-public record CombinedPumpStatus : CombinedStatus
+public record CombinedPumpStatusMessage : CombinedStatusMessage
 {
     public required string Mode { get; set; }
 

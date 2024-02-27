@@ -4,28 +4,28 @@ internal class XmlStatusFileDeserializer : IStatusFileDeserializer
 {
     private const string _errorPrefix = "XML error:";
 
-    private readonly XmlSerializer _instrumentSerializer = new(typeof(Contracts.InstrumentStatus));
+    private readonly XmlSerializer _instrumentSerializer = new(typeof(InstrumentStatus));
     private readonly XmlSerializer[] _rapidControlSerializers =
     [
-        new(typeof(Contracts.CombinedOvenStatus)),
-        new(typeof(Contracts.CombinedPumpStatus)),
-        new(typeof(Contracts.CombinedSamplerStatus))
+        new(typeof(CombinedOvenStatus)),
+        new(typeof(CombinedPumpStatus)),
+        new(typeof(CombinedSamplerStatus))
     ];
 
-    public InstrumentStatus Deserialize(string statusFileContents)
+    public InstrumentStatusMessage Deserialize(string statusFileContents)
     {
         var fileContentsReader = new StringReader(statusFileContents);
-        var instrument = _instrumentSerializer.Deserialize(fileContentsReader) as Contracts.InstrumentStatus
-            ?? throw new ArgumentException($"{_errorPrefix} {nameof(Contracts.InstrumentStatus)} is null");
+        var instrument = _instrumentSerializer.Deserialize(fileContentsReader) as InstrumentStatus
+            ?? throw new ArgumentException($"{_errorPrefix} {nameof(InstrumentStatus)} is null");
 
-        return new InstrumentStatus
+        return new InstrumentStatusMessage
         {
             PackageId = instrument.PackageId,
             DeviceStatuses = instrument.DeviceStatuses?.Select(ToDeviceStatus).ToArray() ?? [],
         };
     }
 
-    private DeviceStatus ToDeviceStatus(Contracts.DeviceStatus device)
+    private DeviceStatusMessage ToDeviceStatus(DeviceStatus device)
     {
         var rapidControlXml = device.RapidControlStatus
             ?? throw new ArgumentException($"{_errorPrefix} {nameof(DeviceStatus.RapidControlStatus)} is null");
@@ -36,14 +36,14 @@ internal class XmlStatusFileDeserializer : IStatusFileDeserializer
             .FirstOrDefault(serializer => serializer.CanDeserialize(rapidControlReader))
             ?? throw new ArgumentException($"{_errorPrefix} Not supported type");
 
-        var rapidControl = rapidControlSerializer.Deserialize(rapidControlReader) as Contracts.CombinedStatus
-            ?? throw new ArgumentException($"{_errorPrefix} {nameof(Contracts.CombinedStatus)} is null");
+        var rapidControl = rapidControlSerializer.Deserialize(rapidControlReader) as CombinedStatus
+            ?? throw new ArgumentException($"{_errorPrefix} {nameof(CombinedStatus)} is null");
 
-        return new DeviceStatus
+        return new DeviceStatusMessage
         {
             ModuleCategoryId = device.ModuleCategoryId,
             IndexWithinRole = device.IndexWithinRole,
-            RapidControlStatus = CombinedStatusMapper.ToMessagingContract(rapidControl),
+            RapidControlStatus = CombinedStatusMapper.ToMessage(rapidControl),
         };
     }
 }

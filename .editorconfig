@@ -157,3 +157,10 @@ dotnet_diagnostic.SA1602.severity = none
 
 # S6602: "Find" method should be used instead of the "FirstOrDefault" extension
 dotnet_diagnostic.S6602.severity = none
+
+[DeviceStatusMapper.cs]
+# RMG020: Source member is not mapped to any target member
+dotnet_diagnostic.RMG020.severity = none
+ 
+ [**/Migrations/*]
+generated_code = true

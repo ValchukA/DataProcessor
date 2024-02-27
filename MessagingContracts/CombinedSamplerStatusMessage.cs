@@ -1,6 +1,6 @@
 ﻿namespace MessagingContracts;
 
-public record CombinedSamplerStatus : CombinedStatus
+public record CombinedSamplerStatusMessage : CombinedStatusMessage
 {
     public required int Status { get; set; }
 

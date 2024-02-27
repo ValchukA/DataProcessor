@@ -1,6 +1,6 @@
 ﻿namespace MessagingContracts;
 
-public record CombinedOvenStatus : CombinedStatus
+public record CombinedOvenStatusMessage : CombinedStatusMessage
 {
     public required bool UseTemperatureControl { get; set; }
 
