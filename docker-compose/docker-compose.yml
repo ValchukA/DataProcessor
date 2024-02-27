@@ -1,12 +1,34 @@
-version: '3.4'
+version: "3.4"
 
 services:
   fileparser:
     build:
       context: ..
       dockerfile: FileParser/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - LocalFiles__StatusesFolderPath=/data
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+    volumes:
+      - fileparser-data:/data
 
   dataprocessor:
     build:
       context: ..
       dockerfile: DataProcessor/Dockerfile
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  fileparser-data:
+  rabbitmq-data:
