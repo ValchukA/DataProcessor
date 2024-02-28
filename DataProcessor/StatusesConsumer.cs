@@ -31,6 +31,6 @@ internal class StatusesConsumer(DataProcessorDbContext dbContext, ILogger<Status
 
         await _dbContext.SaveChangesAsync();
 
-        _logger.LogInformation("Processed {DeviceStatusCount} device statuses", statuses.Length);
+        _logger.LogInformation("Processed {DeviceStatusCount} device status(es)", statuses.Length);
     }
 }
