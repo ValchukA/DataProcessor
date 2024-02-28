@@ -4,6 +4,7 @@ global using System.Xml.Serialization;
 global using FileParser;
 global using FileParser.StatusFileDeserializer;
 global using FileParser.StatusFileDeserializer.Xml;
+global using FileParser.StatusFileDeserializer.Xml.Contracts;
 global using FileParser.StatusFileRepository;
 global using FileParser.StatusFileRepository.Local;
 global using MassTransit;

@@ -8,7 +8,7 @@ internal class StatusesProducer(IStatusFilesRepository statusFilesRepository, IS
     private readonly IBus _bus = bus;
 
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(1));
-    private readonly ModuleState[] _moduleStates = Enum.GetValues<ModuleState>();
+    private readonly ModuleStateMessage[] _moduleStates = Enum.GetValues<ModuleStateMessage>();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -27,7 +27,7 @@ internal class StatusesProducer(IStatusFilesRepository statusFilesRepository, IS
         }
     }
 
-    private void SetRandomModuleStates(IEnumerable<DeviceStatus> deviceStatuses)
+    private void SetRandomModuleStates(IEnumerable<DeviceStatusMessage> deviceStatuses)
     {
         foreach (var deviceStatus in deviceStatuses)
         {

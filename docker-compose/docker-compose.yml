@@ -6,7 +6,8 @@ services:
       context: ..
       dockerfile: FileParser/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
       - LocalFiles__StatusesFolderPath=/data
       - RabbitMq__Host=rabbitmq
@@ -20,7 +21,16 @@ services:
       context: ..
       dockerfile: DataProcessor/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - Sqlite__ConnectionString=Data Source=/data/dataprocessor.db
+      - ApplyMigrations=true
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+    volumes:
+      - dataprocessor-data:/data
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
@@ -28,7 +38,10 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
 
 volumes:
   fileparser-data:
+  dataprocessor-data:
   rabbitmq-data:
