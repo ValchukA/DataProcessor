@@ -19,25 +19,25 @@ internal class StatusesProducer(
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            var statusFiles = _statusFilesRepository.GetAllAsync();
-
-            await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
+            try
             {
-                var instrumentStatus = _statusFileDeserializer.Deserialize(statusFile.Contents);
-                SetRandomModuleStates(instrumentStatus.DeviceStatuses);
+                var statusFiles = _statusFilesRepository.GetAllAsync();
 
-                await _bus.Publish(instrumentStatus, stoppingToken);
-
-                _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
-
-                await _statusFilesRepository.DeleteAsync(statusFile);
-            });
+                await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
+                    await ProcessFileAsync(statusFile));
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "An exception occurred while processing files");
+            }
         }
     }
 
-    private void SetRandomModuleStates(IEnumerable<DeviceStatusMessage> deviceStatuses)
+    private async Task ProcessFileAsync(StatusFile statusFile)
     {
-        foreach (var deviceStatus in deviceStatuses)
+        var instrumentStatus = _statusFileDeserializer.Deserialize(statusFile.Contents);
+
+        foreach (var deviceStatus in instrumentStatus.DeviceStatuses)
         {
             var randomIndex = Random.Shared.Next(_moduleStates.Length);
             deviceStatus.RapidControlStatus.ModuleState = _moduleStates[randomIndex];
@@ -47,5 +47,11 @@ internal class StatusesProducer(
                 deviceStatus.ModuleCategoryId,
                 deviceStatus.RapidControlStatus.ModuleState);
         }
+
+        await _bus.Publish(instrumentStatus);
+
+        _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
+
+        await _statusFilesRepository.DeleteAsync(statusFile);
     }
 }
