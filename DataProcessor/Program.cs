@@ -1,32 +1,7 @@
 ﻿var builder = Host.CreateApplicationBuilder(args);
 
-var rabbitMqSettings = builder.Configuration
-    .GetRequiredSection(RabbitMqSettings.SectionKey)
-    .Get<RabbitMqSettings>()!;
-var sqliteSettings = builder.Configuration
-    .GetRequiredSection(SqliteSettings.SectionKey)
-    .Get<SqliteSettings>()!;
-
-Validator.ValidateObject(rabbitMqSettings, new ValidationContext(rabbitMqSettings));
-Validator.ValidateObject(sqliteSettings, new ValidationContext(sqliteSettings));
-
-builder.Services.AddMassTransit(config =>
-{
-    config.AddConsumer<StatusesConsumer>();
-    config.UsingRabbitMq((context, rabbitMqConfig) =>
-    {
-        rabbitMqConfig.UseMessageRetry(retryConfig => retryConfig.Interval(3, TimeSpan.FromSeconds(5)));
-        rabbitMqConfig.ConfigureEndpoints(context);
-        rabbitMqConfig.Host(rabbitMqSettings.Host, settings =>
-        {
-            settings.Username(rabbitMqSettings.Username);
-            settings.Password(rabbitMqSettings.Password);
-        });
-    });
-});
-
-builder.Services.AddDbContext<DataProcessorDbContext>(options =>
-    options.UseSqlite(sqliteSettings.ConnectionString));
+builder.Services.AddRabbitMq(builder.Configuration);
+builder.Services.AddSqlite(builder.Configuration);
 
 var host = builder.Build();
 
