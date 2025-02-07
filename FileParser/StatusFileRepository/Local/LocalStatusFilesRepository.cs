@@ -4,16 +4,20 @@ internal class LocalStatusFilesRepository(IOptions<LocalFilesSettings> options) 
 {
     private readonly string _folderPath = options.Value.StatusesFolderPath;
 
-    public async IAsyncEnumerable<StatusFile> GetAllAsync()
+    public async Task<IReadOnlyCollection<StatusFile>> GetAllAsync()
     {
+        var statusFiles = new List<StatusFile>();
+
         foreach (var path in Directory.EnumerateFiles(_folderPath))
         {
-            yield return new StatusFile
+            statusFiles.Add(new StatusFile
             {
                 Path = path,
                 Contents = await File.ReadAllTextAsync(path),
-            };
+            });
         }
+
+        return statusFiles;
     }
 
     public Task DeleteAsync(StatusFile statusFile)

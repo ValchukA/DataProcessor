@@ -21,7 +21,7 @@ internal class StatusesProducer(
         {
             try
             {
-                var statusFiles = _statusFilesRepository.GetAllAsync();
+                var statusFiles = await _statusFilesRepository.GetAllAsync();
 
                 await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
                     await ProcessFileAsync(statusFile));
