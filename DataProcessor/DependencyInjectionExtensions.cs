@@ -12,7 +12,6 @@ internal static class DependencyInjectionExtensions
             config.AddConsumer<StatusesConsumer>();
             config.UsingRabbitMq((context, rabbitMqConfig) =>
             {
-                rabbitMqConfig.UseMessageRetry(retryConfig => retryConfig.Interval(3, TimeSpan.FromSeconds(5)));
                 rabbitMqConfig.ConfigureEndpoints(context);
                 rabbitMqConfig.Host(rabbitMqSettings.Host, settings =>
                 {

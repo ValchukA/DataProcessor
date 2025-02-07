@@ -19,24 +19,36 @@ internal class StatusesProducer(
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            try
-            {
-                var statusFiles = await _statusFilesRepository.GetAllAsync();
+            var statusFiles = await _statusFilesRepository.GetAllAsync();
 
-                await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
-                    await ProcessFileAsync(statusFile));
-            }
-            catch (Exception exception)
+            await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
             {
-                _logger.LogError(exception, "An exception occurred while processing files");
-            }
+                InstrumentStatusMessage instrumentStatus;
+
+                try
+                {
+                    instrumentStatus = _statusFileDeserializer.Deserialize(statusFile.Contents);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "An exception occurred while deserializing file at {FilePath}", statusFile.Path);
+
+                    return;
+                }
+
+                ProcessInstrumentStatus(instrumentStatus);
+
+                await _bus.Publish(instrumentStatus, stoppingToken);
+
+                _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
+
+                await _statusFilesRepository.DeleteAsync(statusFile);
+            });
         }
     }
 
-    private async Task ProcessFileAsync(StatusFile statusFile)
+    private void ProcessInstrumentStatus(InstrumentStatusMessage instrumentStatus)
     {
-        var instrumentStatus = _statusFileDeserializer.Deserialize(statusFile.Contents);
-
         foreach (var deviceStatus in instrumentStatus.DeviceStatuses)
         {
             var randomIndex = Random.Shared.Next(_moduleStates.Length);
@@ -47,11 +59,5 @@ internal class StatusesProducer(
                 deviceStatus.ModuleCategoryId,
                 deviceStatus.RapidControlStatus.ModuleState);
         }
-
-        await _bus.Publish(instrumentStatus);
-
-        _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
-
-        await _statusFilesRepository.DeleteAsync(statusFile);
     }
 }

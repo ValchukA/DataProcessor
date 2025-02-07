@@ -22,11 +22,11 @@ internal class StatusesConsumer(DataProcessorDbContext dbContext, ILogger<Status
             if (existingCategoryIds.Contains(statusEntity.ModuleCategoryId))
             {
                 _dbContext.Update(statusEntity);
-
-                continue;
             }
-
-            _dbContext.Add(statusEntity);
+            else
+            {
+                _dbContext.Add(statusEntity);
+            }
         }
 
         await _dbContext.SaveChangesAsync();
