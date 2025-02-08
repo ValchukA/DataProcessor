@@ -4,7 +4,7 @@ internal record DeviceStatusEntity
 {
     [Key]
     [MaxLength(50)]
-    public required string ModuleCategoryId { get; set; }
+    public required string ModuleCategoryId { get; init; }
 
-    public required ModuleStateEntity ModuleState { get; set; }
+    public required ModuleStateEntity ModuleState { get; init; }
 }

@@ -3,8 +3,8 @@
 public record InstrumentStatus
 {
     [XmlElement("PackageID")]
-    public required string PackageId { get; set; }
+    public required string PackageId { get; init; }
 
     [XmlElement("DeviceStatus")]
-    public required DeviceStatus[]? DeviceStatuses { get; set; }
+    public required DeviceStatus[]? DeviceStatuses { get; init; }
 }
