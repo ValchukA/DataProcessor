@@ -12,6 +12,7 @@ internal static class DependencyInjectionExtensions
             config.AddConsumer<StatusesConsumer>();
             config.UsingRabbitMq((context, rabbitMqConfig) =>
             {
+                rabbitMqConfig.UseConcurrencyLimit(1);
                 rabbitMqConfig.ConfigureEndpoints(context);
                 rabbitMqConfig.Host(rabbitMqSettings.Host, settings =>
                 {

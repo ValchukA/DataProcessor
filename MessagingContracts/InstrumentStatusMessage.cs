@@ -2,7 +2,7 @@
 
 public record InstrumentStatusMessage
 {
-    public required string PackageId { get; set; }
+    public required string PackageId { get; init; }
 
-    public required DeviceStatusMessage[] DeviceStatuses { get; set; }
+    public required IReadOnlyCollection<DeviceStatusMessage> DeviceStatuses { get; init; }
 }

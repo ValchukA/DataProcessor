@@ -36,9 +36,9 @@ internal class StatusesProducer(
                     return;
                 }
 
-                ProcessInstrumentStatus(instrumentStatus);
+                var processedInstrumentStatus = ProcessInstrumentStatus(instrumentStatus);
 
-                await _bus.Publish(instrumentStatus, stoppingToken);
+                await _bus.Publish(processedInstrumentStatus, stoppingToken);
 
                 _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
 
@@ -47,17 +47,25 @@ internal class StatusesProducer(
         }
     }
 
-    private void ProcessInstrumentStatus(InstrumentStatusMessage instrumentStatus)
+    private InstrumentStatusMessage ProcessInstrumentStatus(InstrumentStatusMessage instrumentStatus)
     {
-        foreach (var deviceStatus in instrumentStatus.DeviceStatuses)
+        var processedDeviceStatuses = instrumentStatus.DeviceStatuses.Select(deviceStatus =>
         {
             var randomIndex = Random.Shared.Next(_moduleStates.Length);
-            deviceStatus.RapidControlStatus.ModuleState = _moduleStates[randomIndex];
+
+            var processedDeviceStatus = deviceStatus with
+            {
+                RapidControlStatus = deviceStatus.RapidControlStatus with { ModuleState = _moduleStates[randomIndex] },
+            };
 
             _logger.LogInformation(
                 "Set module state of {ModuleCategoryId} to {ModuleState}",
-                deviceStatus.ModuleCategoryId,
-                deviceStatus.RapidControlStatus.ModuleState);
-        }
+                processedDeviceStatus.ModuleCategoryId,
+                processedDeviceStatus.RapidControlStatus.ModuleState);
+
+            return processedDeviceStatus;
+        });
+
+        return instrumentStatus with { DeviceStatuses = processedDeviceStatuses.ToArray() };
     }
 }
