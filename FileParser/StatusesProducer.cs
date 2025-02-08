@@ -15,7 +15,7 @@ internal class StatusesProducer(
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(1));
     private readonly ModuleStateMessage[] _moduleStates = Enum.GetValues<ModuleStateMessage>();
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync111(CancellationToken stoppingToken)
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
