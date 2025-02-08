@@ -19,39 +19,53 @@ internal class StatusesProducer(
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            try
-            {
-                var statusFiles = _statusFilesRepository.GetAllAsync();
+            var statusFiles = await _statusFilesRepository.GetAllAsync();
 
-                await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
-                    await ProcessFileAsync(statusFile));
-            }
-            catch (Exception exception)
+            await Parallel.ForEachAsync(statusFiles, async (statusFile, _) =>
             {
-                _logger.LogError(exception, "An exception occurred while processing files");
-            }
+                InstrumentStatusMessage instrumentStatus;
+
+                try
+                {
+                    instrumentStatus = _statusFileDeserializer.Deserialize(statusFile.Contents);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "An exception occurred while deserializing file at {FilePath}", statusFile.Path);
+
+                    return;
+                }
+
+                var processedInstrumentStatus = ProcessInstrumentStatus(instrumentStatus);
+
+                await _bus.Publish(processedInstrumentStatus, stoppingToken);
+
+                _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
+
+                await _statusFilesRepository.DeleteAsync(statusFile);
+            });
         }
     }
 
-    private async Task ProcessFileAsync(StatusFile statusFile)
+    private InstrumentStatusMessage ProcessInstrumentStatus(InstrumentStatusMessage instrumentStatus)
     {
-        var instrumentStatus = _statusFileDeserializer.Deserialize(statusFile.Contents);
-
-        foreach (var deviceStatus in instrumentStatus.DeviceStatuses)
+        var processedDeviceStatuses = instrumentStatus.DeviceStatuses.Select(deviceStatus =>
         {
             var randomIndex = Random.Shared.Next(_moduleStates.Length);
-            deviceStatus.RapidControlStatus.ModuleState = _moduleStates[randomIndex];
+
+            var processedDeviceStatus = deviceStatus with
+            {
+                RapidControlStatus = deviceStatus.RapidControlStatus with { ModuleState = _moduleStates[randomIndex] },
+            };
 
             _logger.LogInformation(
                 "Set module state of {ModuleCategoryId} to {ModuleState}",
-                deviceStatus.ModuleCategoryId,
-                deviceStatus.RapidControlStatus.ModuleState);
-        }
+                processedDeviceStatus.ModuleCategoryId,
+                processedDeviceStatus.RapidControlStatus.ModuleState);
 
-        await _bus.Publish(instrumentStatus);
+            return processedDeviceStatus;
+        });
 
-        _logger.LogInformation("Published statuses from {FilePath}", statusFile.Path);
-
-        await _statusFilesRepository.DeleteAsync(statusFile);
+        return instrumentStatus with { DeviceStatuses = processedDeviceStatuses.ToArray() };
     }
 }

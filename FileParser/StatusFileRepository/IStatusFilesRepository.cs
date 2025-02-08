@@ -2,7 +2,7 @@
 
 internal interface IStatusFilesRepository
 {
-    IAsyncEnumerable<StatusFile> GetAllAsync();
+    Task<IReadOnlyCollection<StatusFile>> GetAllAsync();
 
     Task DeleteAsync(StatusFile statusFile);
 }

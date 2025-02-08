@@ -3,9 +3,9 @@
 public record DeviceStatus
 {
     [XmlElement("ModuleCategoryID")]
-    public required string ModuleCategoryId { get; set; }
+    public required string ModuleCategoryId { get; init; }
 
-    public required int IndexWithinRole { get; set; }
+    public required int IndexWithinRole { get; init; }
 
-    public required string RapidControlStatus { get; set; }
+    public required string RapidControlStatus { get; init; }
 }
