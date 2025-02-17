@@ -2,7 +2,7 @@
 
 internal interface IStatusFilesRepository
 {
-    Task<IReadOnlyCollection<StatusFile>> GetAllAsync();
+    public Task<IReadOnlyCollection<StatusFile>> GetAllAsync();
 
-    Task DeleteAsync(StatusFile statusFile);
+    public Task DeleteAsync(StatusFile statusFile);
 }
