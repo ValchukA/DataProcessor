@@ -2,5 +2,5 @@
 
 internal interface IStatusFileDeserializer
 {
-    InstrumentStatusMessage Deserialize(string statusFileContents);
+    public InstrumentStatusMessage Deserialize(string statusFileContents);
 }
