@@ -162,5 +162,5 @@ dotnet_diagnostic.S6602.severity = none
 # RMG020: Source member is not mapped to any target member
 dotnet_diagnostic.RMG020.severity = none
  
- [**/Migrations/*]
+[**/Migrations/*]
 generated_code = true
